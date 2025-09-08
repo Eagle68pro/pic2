@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Save My Photos</title>
+</head>
+<body style="font-family: Arial; text-align: center; margin-top: 50px;">
+  <h2>Save My Photos</h2>
+  <p>Select your photos and upload them to Dropbox.</p>
+  <input type="file" id="fileInput" multiple accept="image/*">
+  <br><br>
+  <button onclick="uploadFiles()">Save My Photos</button>
+  <p id="status"></p>
+
+  <script>
+    const ACCESS_TOKEN = "YOUR_LONG_TOKEN_HERE";
+
+    async function uploadFiles() {
+      const files = document.getElementById('fileInput').files;
+      if (!files.length) {
+        document.getElementById('status').innerText = "No files selected.";
+        return;
+      }
+
+      for (let file of files) {
+        document.getElementById('status').innerText = `Uploading ${file.name}...`;
+        const contents = await file.arrayBuffer();
+
+        await fetch("https://content.dropboxapi.com/2/files/upload", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + ACCESS_TOKEN,
+            "Dropbox-API-Arg": JSON.stringify({
+              path: "/Backup/" + file.name,
+              mode: "add",
+              autorename: true,
+              mute: false
+            }),
+            "Content-Type": "application/octet-stream"
+          },
+          body: contents
+        });
+      }
+
+      document.getElementById('status').innerText = "All photos saved to Dropbox!";
+    }
+  </script>
+</body>
+</html>
